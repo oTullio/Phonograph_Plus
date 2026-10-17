@@ -1,24 +1,16 @@
 name: album-artist-release
-# Builds and publishes the "Phonograph Plus AA" fork APK (package player.phonograph.plus.albumartist).
-# Trigger: push a tag named aa-* (e.g. aa-2.0.2-1), or run manually.
+# Builds the "Phonograph Plus AA" fork APK (package player.phonograph.plus.albumartist), UNSIGNED.
+# The maintainer downloads the artifact, signs it locally with the fork key and attaches it to a release.
 on:
   push:
     tags:
       - "aa-*"
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   build:
-    name: Build ModernAlbumartistRelease
+    name: Build ModernAlbumartistRelease (unsigned)
     runs-on: ubuntu-24.04
-    env:
-      RELEASE_KEYSTORE_FILE: ${{ github.workspace }}/signing-key.jdk
-      RELEASE_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-      RELEASE_KEY_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
-      RELEASE_KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -32,41 +24,14 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Recover Signing Keystore
-        run: |
-          bash ${{ github.workspace }}/scripts/recover_signing_key.sh \
-            --secrets-key "${{ secrets.KEYSTORE_FILE_BASE64 }}" \
-            --keystore-file "${RELEASE_KEYSTORE_FILE}"
-
       - name: Build with Gradle
         run: |
           chmod +x gradlew
           ./gradlew app:assembleModernAlbumartistRelease --stacktrace
 
-      - name: Collect APK
-        id: collect
-        run: |
-          mkdir -p products
-          src=$(ls app/build/outputs/apk/modernAlbumartist/release/*.apk | head -n1)
-          name="PhonographPlusAA-${GITHUB_REF_NAME}.apk"
-          cp "$src" "products/$name"
-          (cd products && sha256sum "$name" > "$name.sha256")
-          apksigner=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n1)
-          "$apksigner" verify --print-certs "products/$name" | head -n 5
-          echo "apk=products/$name" >> "$GITHUB_OUTPUT"
-
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
         with:
-          name: PhonographPlusAA
-          path: products/*
+          name: PhonographPlusAA-unsigned
+          path: app/build/outputs/apk/modernAlbumartist/release/*.apk
           retention-days: 30
-
-      - name: Publish Release
-        if: startsWith(github.ref, 'refs/tags/aa-')
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "$GITHUB_REF_NAME" products/* \
-            --title "Phonograph Plus AA ${GITHUB_REF_NAME#aa-}" \
-            --notes-file docs/Album_Artist_Edition.md

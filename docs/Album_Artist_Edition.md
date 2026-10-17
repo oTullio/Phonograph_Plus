@@ -41,5 +41,5 @@ Once you're happy with the new app, you can uninstall the official one, or keep 
 ./gradlew app:assembleModernAlbumartistRelease
 ```
 
-Signed release APKs come from the `album-artist-release` GitHub Actions workflow when an
-`aa-*` tag is pushed.
+The `album-artist-release` GitHub Actions workflow builds an unsigned release APK (on `aa-*` tags or
+manual runs). It is signed locally with the fork key before being attached to a release.
