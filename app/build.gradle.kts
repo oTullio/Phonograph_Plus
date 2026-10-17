@@ -123,6 +123,14 @@ android {
 
             resValue("string", "app_name", appName)
         }
+        // Unofficial fork build: "Album artists only" Artists tab; installs alongside the official app
+        create("albumartist") {
+            dimension = "channel"
+            matchingFallbacks.add("stable")
+
+            resValue("string", "app_name", "$appName AA")
+            applicationIdSuffix = ".albumartist"
+        }
         // for checkout to locate a bug and ci etc.
         create("checkout") {
             dimension = "channel"

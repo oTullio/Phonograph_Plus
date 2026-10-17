@@ -1,3 +1,10 @@
+> [!NOTE]
+> **This is an unofficial fork:** *Phonograph Plus AA* adds an **"Album artists only"** option to the
+> Artists tab. Download it from [Releases](../../releases), and see
+> [docs/Album_Artist_Edition.md](docs/Album_Artist_Edition.md) for how to install it next to the
+> official app and move your data across. For the official app, go to
+> [chr56/Phonograph_Plus](https://github.com/chr56/Phonograph_Plus).
+
 # Phonograph Plus
 
 <p align="center">
